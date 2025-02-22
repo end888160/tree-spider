@@ -7,8 +7,124 @@ Help with ChatGPT: https://chatgpt.com/c/67b0e93c-c474-8004-8740-e4bbb98486d1
 
 """
 
-print("\n\n	🌳 Tree Spider - Directory Snapshot Tool\n\n")
+
+
+# Color ANSI codes
+RESET = "\033[0m"
+RED = "\033[31m"
+GREEN = "\033[32m"
+YELLOW = "\033[33m"
+BLUE = "\033[34m"
+PURPLE = "\033[35m"
+CYAN = "\033[36m"
+ORANGE = "\033[38;5;208m"
+WHITE = "\033[37m"
+BOLD = "\033[1m"
+BOLD_ORANGE = "\033[1;33m"
+BOLD_CYAN = "\033[1;36m"
+GREY = "\033[90m"
+
+
+print(f"\n\n{GREEN}	🌳 Tree Spider{RESET} - {ORANGE}Directory Snapshot Tool{RESET}\n\n")
 print("		⏳ Initializing...\n")
+
+import sys
+import time
+import itertools
+import threading
+
+class Spinner:
+	def __init__(self, wait=0.05, show_timer=True, timer_delay=2, char="ascii", done_message=" "):
+		"""
+		Initialize a Spinner object with customizable animation and timer settings.
+
+		Parameters:
+			wait (float, optional): The delay between each animation frame in seconds. Defaults to 0.1.
+			show_timer (bool, optional): Whether to display a timer alongside the animation. Defaults to True.
+			timer_delay (int, optional): The delay in seconds before the timer starts displaying. Defaults to 2.
+			char (str, optional): The character set to use for the animation. Options include "braille", "braille2", "fragment", "shade", "normal", "squish", "trigram", "trigram2", "emoji_arrows", "emoji_hourglass", "emoji_clock", and "ascii". Defaults to "ascii".
+			done_message (str, optional): The message to display when the animation is stopped. Defaults to " ".
+
+		Returns:
+			None
+		"""
+
+		# Spinner animation frames
+		if char == "braille":
+			symbols = ["⠋", "⠙", "⠸", "⠴", "⠦", "⠇"]
+		elif char == "braille2":
+			symbols = ["⠋⠀", "⠉⠁", "⠈⠃", "⠀⠇", "⠠⠆", "⠤⠄", "⠦⠀", "⠇⠀"]
+		elif char == "fragment":
+			symbols = ["█","▖","▗","▘","▙","▚","▛","▜","▝","▞","▟"]
+			random.shuffle(symbols)
+		elif char == "shade":
+			symbols = ["█", "▓", "▒", "░", "▒", "▓"]
+		elif char == "normal":
+			symbols = [ "◞","◡", "◟","◜","◠","◝"]
+			symbols = ["◞", "◟","◜","◝"]
+		elif char == "squish":
+			symbols = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "█","▉","▊","▋","▌","▍","▎","▏"," "]
+		elif char == "trigram":
+			symbols = ["☰", "☱" ,"☲", "☴", "☶", "☵" ,"☳" ,"☷","☳", "☵","☶","☴","☲","☱","☰"]
+		elif char == "trigram2":
+			symbols = ["☰", "☱","☳","☷", "☶","☴","☰"]
+		elif char == "emoji_arrows":
+			symbols = ["⬆️","↗️","➡️","↘️","⬇️","↙️","⬅️","↖️"]
+		elif char == "emoji_hourglass":
+			symbols = ["⏳", "⏳", "⏳","⏳", "⌛", "⌛", "⌛", "⌛"]
+		elif char == "emoji_clock":
+			symbols = ["🕐","🕜","🕑","🕝","🕒","🕞","🕓","🕟","🕔","🕠","🕕","🕡","🕖","🕢","🕗","🕣","🕘","🕤","🕙","🕥","🕚","🕦","🕛","🕧"]
+		elif char == "emoji_moon":
+			symbols = ["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"]
+		elif char == "emoji_moon2":
+			symbols = ["🌚","🌒","🌓","🌔", "🌝","🌖","🌗","🌘"]
+		elif char == "emoji_globe":
+			symbols = ["🌍","🌍","🌍","🌍","🌎","🌎","🌎","🌎","🌏","🌏","🌏","🌏",]
+		else: # char == "ascii"
+			symbols = ['|', '/', '-', '\\']
+
+		self.spinner_cycle = itertools.cycle(symbols)
+		self.wait = wait
+		self.show_timer = show_timer
+		self.timer_delay = timer_delay
+		self.running = False
+		self.done_message = done_message
+		self.thread = None
+
+	def spin(self):
+		"""Spinner animation running in a separate thread."""
+		while self.running:
+			elapsed = time.time() - start_spinner
+			if elapsed < self.timer_delay or not self.show_timer:
+				time_print = ""
+			else:
+				time_print = f" ({format_duration(elapsed)})"
+
+			sys.stdout.write(f'\r{next(self.spinner_cycle)}' + time_print)  # Overwrite previous character
+			sys.stdout.flush()
+			time.sleep(self.wait)
+
+	def start(self):
+		"""Start the spinner thread."""
+		if not self.running:
+			global start_spinner
+			start_spinner = time.time()
+			self.running = True
+			self.thread = threading.Thread(target=self.spin, daemon=True)  # Daemon thread stops when main exits
+			self.thread.start()
+
+	def stop(self):
+		"""Stop the spinner and clear the line."""
+		self.running = False
+		if self.thread:
+			self.thread.join()  # Ensure the thread stops
+		sys.stdout.write(f'\r{self.done_message}\n')  # Print completion message
+		sys.stdout.flush()
+
+init_spinner = Spinner()
+init_spinner.start()
+
+
 # Colored emojis
 colored_check = "\033[32m✅\033[0m"
 colored_x = "\033[31m❌\033[0m"
@@ -21,41 +137,16 @@ colored_arrow_right = "\033[33m🡆\033[0m"
 colored_exclamation = "\033[31m❗\033[0m"
 
 
-
-# Color ANSI codes
-RESET = "\033[0m"
-RED = "\033[31m"
-GREEN = "\033[32m"
-YELLOW = "\033[33m"
-BLUE = "\033[34m"
-PURPLE = "\033[35m"
-CYAN = "\033[36m"
-WHITE = "\033[37m"
-BOLD = "\033[1m"
-BOLD_ORANGE = "\033[1;33m"
-BOLD_CYAN = "\033[1;36m"
-GREY = "\033[90m"
-
-def colored_emoji_test():
-	""" Test all defined emojis are working. """
-	print(f"{colored_check} {colored_x} {colored_stop} {colored_warn} {colored_bulb} {colored_no_entry} {colored_question} {colored_arrow_right} {colored_exclamation}")
-	print("See if the emojis are working...")
-	print(f"If they are, remove colored_emoji_test() from {__file__}...")
-	exit()
-
 error_logs = []
+from inputimeout import inputimeout, TimeoutOccurred
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import defaultdict
 from datetime import datetime
-from functools import partial
 from getpass import getpass
 import concurrent.futures
 from tqdm import tqdm
 from sys import exit
-import subprocess
-import threading
 import mimetypes
-import itertools
 import traceback
 import platform
 import humanize
@@ -63,15 +154,15 @@ import logging
 import shutil
 import random
 import psutil
+import heapq
 import math
 import json
-import time
 import stat
-import sys
 import bz2
 import re
 import os
-try: # Google Magika, Python 3.12 - 3.8	
+
+try: # Google Magika, Python 3.12 - 3.8
 	from magika import Magika
 	import pathlib
 	m = Magika()
@@ -106,7 +197,7 @@ if os.name == "nt":  # Windows only, get volume label
 			file_system,
 			ctypes.sizeof(file_system)
 		)
-		
+
 		return volume_name.value if volume_name.value else None
 
 logging.basicConfig(format='[%(levelname)s] %(message)s')
@@ -115,7 +206,7 @@ logger = logging.getLogger(__name__)
 try:
 	import keyboard
 except ModuleNotFoundError as m: # Keyboard, optional
-	print(f"{colored_warn}{YELLOW}[{type(m).__name__}]{RESET}: {m} - keyboard module not found.")
+	print(f"{colored_warn}{YELLOW}[{type(m).__name__}]{RESET}: {m} - keyboard module (optional) not found.")
 	print(f"{colored_bulb} Install with: `{GREY}pip install keyboard{RESET}`")
 
 try:
@@ -140,110 +231,20 @@ if "magic" in sys.modules:
 		error_logs.append({"name": "magic", "type": str(type(m).__name__), "desc": str(m)})
 
 
-class Spinner:
-	def __init__(self, wait=0.05, show_timer=True, timer_delay=2, char="ascii", done_message=" "):
-		"""
-		Initialize a Spinner object with customizable animation and timer settings.
 
-		Parameters:
-			wait (float, optional): The delay between each animation frame in seconds. Defaults to 0.1.
-			show_timer (bool, optional): Whether to display a timer alongside the animation. Defaults to True.
-			timer_delay (int, optional): The delay in seconds before the timer starts displaying. Defaults to 2.
-			char (str, optional): The character set to use for the animation. Options include "braille", "braille2", "fragment", "shade", "normal", "squish", "trigram", "trigram2", "emoji_arrows", "emoji_hourglass", "emoji_clock", and "ascii". Defaults to "ascii".
-			done_message (str, optional): The message to display when the animation is stopped. Defaults to " ".
 
-		Returns:
-			None
-		"""
-		
-		# Spinner animation frames
-		if char == "braille":
-			symbols = ["⠋", "⠙", "⠸", "⠴", "⠦", "⠇"]
-		elif char == "braille2":
-			symbols = ["⠋⠀", "⠉⠁", "⠈⠃", "⠀⠇", "⠠⠆", "⠤⠄", "⠦⠀", "⠇⠀"]
-		elif char == "fragment":
-			symbols = ["█","▖","▗","▘","▙","▚","▛","▜","▝","▞","▟"]
-			random.shuffle(symbols)
-		elif char == "shade":
-			symbols = ["█", "▓", "▒", "░", "▒", "▓"]
-		elif char == "normal":
-			symbols = [ "◞","◡", "◟","◜","◠","◝"]
-			symbols = ["◞", "◟","◜","◝"]
-		elif char == "squish":
-			symbols = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "█","▉","▊","▋","▌","▍","▎","▏"," "]
-		elif char == "trigram":
-			symbols = ["☰", "☱" ,"☲", "☴", "☶", "☵" ,"☳" ,"☷","☳", "☵","☶","☴","☲","☱","☰"]
-		elif char == "trigram2":
-			symbols = ["☰", "☱","☳","☷", "☶","☴","☰"]
-		elif char == "emoji_arrows":
-			symbols = ["⬆️","↗️","➡️","↘️","⬇️","↙️","⬅️","↖️"]
-		elif char == "emoji_hourglass":
-			symbols = ["⏳", "⏳", "⏳","⏳", "⌛", "⌛", "⌛", "⌛"]
-		elif char == "emoji_clock":
-			symbols = ["🕐","🕜","🕑","🕝","🕒","🕞","🕓","🕟","🕔","🕠","🕕","🕡","🕖","🕢","🕗","🕣","🕘","🕤","🕙","🕥","🕚","🕦","🕛","🕧"]
-		elif char == "emoji_moon":
-			symbols = ["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"]
-		elif char == "emoji_moon2":
-			symbols = ["🌚","🌒","🌓","🌔", "🌝","🌖","🌗","🌘"]
-		elif char == "emoji_globe":
-			symbols = ["🌍","🌍","🌍","🌍","🌎","🌎","🌎","🌎","🌏","🌏","🌏","🌏",]
-		else: # char == "ascii"
-			symbols = ['|', '/', '-', '\\']
-		
-		self.spinner_cycle = itertools.cycle(symbols)
-		self.wait = wait
-		self.show_timer = show_timer
-		self.timer_delay = timer_delay
-		self.running = False
-		self.done_message = done_message
-		self.thread = None
 
-	def spin(self):
-		"""Spinner animation running in a separate thread."""
-		while self.running:
-			elapsed = time.time() - start_spinner
-			if elapsed < self.timer_delay or not self.show_timer:
-				time_print = ""
-			else:
-				time_print = f" ({format_duration(elapsed)})"
-			
-			sys.stdout.write(f'\r{next(self.spinner_cycle)}' + time_print)  # Overwrite previous character
-			sys.stdout.flush()
-			time.sleep(self.wait)
-
-	def start(self):
-		"""Start the spinner thread."""
-		if not self.running:
-			global start_spinner
-			start_spinner = time.time()
-			self.running = True
-			self.thread = threading.Thread(target=self.spin, daemon=True)  # Daemon thread stops when main exits
-			self.thread.start()
-
-	def stop(self):
-		"""Stop the spinner and clear the line."""
-		self.running = False
-		if self.thread:
-			self.thread.join()  # Ensure the thread stops
-		sys.stdout.write(f'\r{self.done_message}\n')  # Print completion message
-		sys.stdout.flush()
-
-init_spinner = Spinner()
-init_spinner.start()
-
-from inputimeout import inputimeout, TimeoutOccurred
-
-def timed_choice(question, timeout=10, default=False):
+def timed_choice(question, timeout=10, default=False, timeout_message="\nTimed out! Using default response."):
 	# Function to ask a yes/no question with a timeout
 	# If y == return True else return False
 	try:
-		answer = inputimeout(prompt=f"{question} (yes/no) [Default: {default}]\n", timeout=timeout)
+		answer = inputimeout(prompt=f"{question} ([y]es/[n]o) [Default: {default}]\n", timeout=timeout)
 		if answer.lower() == 'y' or answer.lower() == 'yes':
 			return True
 		else:
 			return False
 	except TimeoutOccurred:
-		print('\nTimed out! Using default response.')
+		print(timeout_message)
 		return default
 
 # Example usage
@@ -258,8 +259,8 @@ def seconds_to_datetime(seconds, ispath=False):
 	Returns:
 		str: The formatted date string.
 	"""
-	
-	
+
+
 	pattern = "%Y-%m-%d_%H%M%S" if ispath else "%Y-%m-%d %H:%M:%S.%f"
 	return str(datetime.fromtimestamp(math.fabs(seconds)).strftime(pattern))
 
@@ -305,7 +306,7 @@ def plural(value, plural="s", non_plural=""):
 
 	Returns:
 		str: The appropriate suffix based on the value.
-	
+
 	Example:
 		>>> plural(1)
 		''
@@ -395,7 +396,7 @@ def clear_screen():
 	"""
 	os.system('cls' if os.name == 'nt' else 'clear')
 
-def title(title):
+def title_console(title):
 	"""
 	Sets the console window title to the specified string.
 
@@ -436,7 +437,7 @@ def timeout(timeout=10, nobreak=False, key='Enter'):
 		timeout (int): The number of seconds to wait. A value of -1 means to wait indefinitely for a key press.
 		nobreak (bool): If True, ignore key press except for CTRL+C. Default is False.
 		key (str): The key to wait for. Default is 'Enter'.
-	
+
 	Returns:
 		None
 	"""
@@ -909,7 +910,7 @@ def get_folder_icon(path):
 		"private": "🔒",
 		"System": "🏢",
 		"Network": "🌐",
-		
+
 		# Windows
 		"$Recycle.Bin": "♻️",
 		".thumbnails": "📌",
@@ -1033,35 +1034,34 @@ def get_mime_type(file_path, max_size, force_magic, use_magika):  # Limit MIME d
 	try:
 		# First, get mime type by extension
 		mime = mimetypes.guess_type(file_path)[0]
-		# if file size is greater than threshold, never use magic to prevent disk overload
-		if max_size > os.path.getsize(file_path): 
-			# If mime type is unknown or common, use magic for deep search
-			if (mime == None or mime == '' or mime == "application/octet-stream" or mime == "text/plain") or force_magic: # If mime type is too common, or forced to use magic
-				try:
-					if use_magika and "magika" in sys.modules: # If using magika
-						mime = m.identify_path(pathlib.Path(file_path)).output.mime_type
-						if use_magika:
-							magic_scanned += 1
-					elif use_magika and "magic" in sys.modules: # If not using magika
-						mime = magic.from_file(file_path, mime=True)
-						if not use_magika:
-							magic_scanned += 1
-				except Exception as e: # if magic failed, return mimetypes: last resort
-					magic_scanned -= 1
-					logging.debug(f"{colored_warn} {e}")
-					mime = mimetypes.guess_type(file_path)[0]
-					logging.debug(f"{colored_warn} falling back: {e}; {mime}")
-				if mime == None or mime == '': # if magic failed, return mimetypes: last resort
-					mime = mimetypes.guess_type(file_path)[0]
-
-		logging.debug(f"{file_path} mime detail searched: {mime}")
-		if mime == None or mime == '':
-			return "Unknown"
-		else:
-			return mime
 	except Exception as x:
-		logging.warning(x)
-		return f"[{type(x).__name__}]: {x}"
+		logger.warning(x)
+		return f"[{type(x).__name__}] {x}"
+	# if file size is greater than threshold, never use magic to prevent disk overload
+	if max_size > os.path.getsize(file_path):
+		# If mime type is unknown, common or forced, use magic for deep search
+		if (mime == None or mime == '' or mime == "application/octet-stream" or mime == "text/plain") or force_magic:
+			try:
+				magic_scanned += 1
+				if use_magika and "magika" in sys.modules: # If using magika
+					mime = m.identify_path(pathlib.Path(file_path)).output.mime_type
+				elif not use_magika and "magic" in sys.modules: # If not using magika
+					mime = magic.from_file(file_path, mime=True)
+				logger.debug(f"{file_path} mime detail searched: {mime}")
+			except Exception as e: # if magic failed, return mimetypes: last resort
+				magic_scanned -= 1
+				logger.debug(f"{colored_warn} {e}")
+				logger.debug(f"{colored_warn} falling back: {e}; {mime}")
+			if mime == None or mime == '': # if magic failed, return mimetypes: last resort
+				mime = mimetypes.guess_type(file_path)[0]
+
+
+
+	if mime == None or mime == '':
+		return "Unknown"
+	else:
+		return mime
+
 def get_file_attributes(file_path):
 	"""Get attributes of a file."""
 	attributes = []
@@ -1110,24 +1110,24 @@ def get_folder_structure_threaded(path, progress_bar=None, error_logs=None, no_a
 		denied_folders += 1
 		if error_logs is not None:
 			error_logs.append({"name": path, "type":str(type(e).__name__), "desc": str(e)})
-			sys.stdout.write(f"\n")
+			sys.stdout.write("\n")
 			if logger.isEnabledFor(logging.DEBUG):
 				traceback.print_exc(file=sys.stdout)
-			logging.debug(e)
+			logger.debug(e)
 			if "PermissionError" in type(e).__name__:
-				logging.warning(f"{colored_no_entry} Permission denied: '{GREY}{path}{RESET}'")
+				logger.warning(f"{colored_no_entry} Permission denied: '{GREY}{path}{RESET}'")
 			elif "OSError" in type(e).__name__:
-				logging.warning(f"🚫 Access error: '{GREY}{path}{RESET}'")
+				logger.warning(f"🚫 Access error: '{GREY}{path}{RESET}'")
 			elif "FileNotFoundError" in type(e).__name__:
-				logging.warning(f"❔ File not found: '{GREY}{path}{RESET}'")
+				logger.warning(f"❔ File not found: '{GREY}{path}{RESET}'")
 			elif "IsADirectoryError" in type(e).__name__: # Skip junctions
-					logging.warning(f"🛤️ Junction skipped: '{GREY}{path}{RESET}'")
+					logger.warning(f"🛤️ Junction skipped: '{GREY}{path}{RESET}'")
 			elif "NotADirectoryError" in type(e).__name__:
-				logging.warning(f"🚧 Not a directory: '{GREY}{path}{RESET}'")
+				logger.warning(f"🚧 Not a directory: '{GREY}{path}{RESET}'")
 			elif "FileExistsError" in type(e).__name__: # Skip symbolic links
-				logging.warning(f"🔗 Symbolic link skipped: '{GREY}{path}{RESET}'")
+				logger.warning(f"🔗 Symbolic link skipped: '{GREY}{path}{RESET}'")
 			else:
-				logging.warning(f"{colored_x} Error: '{GREY}{path}{RESET}' due to {e}")
+				logger.warning(f"{colored_x} Error: '{GREY}{path}{RESET}' due to {e}")
 
 			tree.append({
 				"name": os.path.basename(path), # Folder name
@@ -1150,14 +1150,14 @@ def get_folder_structure_threaded(path, progress_bar=None, error_logs=None, no_a
 	with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
 		for entry in entries:
 			entry_name = entry.name  # Store entry name to prevent race conditions
-			entry_path = entry.path 
+			entry_path = entry.path
 			entry_stat = entry.stat(follow_symlinks=False)
 			if entry.is_symlink():
 				tree.append({
-					"name": entry_name, 
-					"path": entry_path, 
+					"name": entry_name,
+					"path": entry_path,
 					"type": "symlink",
-					"target": os.readlink(entry_path), 
+					"target": os.readlink(entry_path),
 					"attr": get_file_attributes(entry.path) if not no_attributes else None,
 					"size": 0,
 					"mtime": entry_stat.st_mtime,
@@ -1175,26 +1175,26 @@ def get_folder_structure_threaded(path, progress_bar=None, error_logs=None, no_a
 						"path": entry_path,
 						"type": "file",
 						"mime": mime_type,
-						"size": file_size, 
+						"size": file_size,
 						"attr": get_file_attributes(entry.path) if not no_attributes else None,
 						"mtime": file_stat.st_mtime,
-						"ctime": file_stat.st_ctime, 
+						"ctime": file_stat.st_ctime,
 						"atime": file_stat.st_atime,
 					})
 				except Exception as e:
 					error_logs.append({"name": path, "type": str(type(e).__name__), "desc": str(e)})
 					if args.verbose:
 						traceback.print_exc(file=sys.stdout)
-					logging.warning(e)
+					logger.warning(e)
 					tree.append({
 						"name": entry_name,
 						"path": entry_path,
 						"type": "file",
 						"mime": str(type(e).__name__),
-						"size": 0, 
+						"size": 0,
 						"attr": get_file_attributes(entry.path) if not no_attributes else None,
 						"mtime": 0,
-						"ctime": 0, 
+						"ctime": 0,
 						"atime": 0,
 					})
 				total_size += file_size
@@ -1215,39 +1215,39 @@ def get_folder_structure_threaded(path, progress_bar=None, error_logs=None, no_a
 				scanned_folders += child_folders
 				entry_stat = entry.stat(follow_symlinks=False)
 				tree.append({
-					"name": folder_name, 
-					"path": folder_path, 
+					"name": folder_name,
+					"path": folder_path,
 					"type": "folder",
-					"size": child_size, 
+					"size": child_size,
 					"attr": get_file_attributes(folder_path) if not no_attributes else None,
 					"mtime": entry_stat.st_mtime,
 					"ctime": entry_stat.st_ctime,
 					"atime": entry_stat.st_atime,
 					"files": child_files,
-					"folders": child_folders, 
+					"folders": child_folders,
 					"access_denied": False,
 					"children": children,
 				})
 			except Exception as e:
 				error_logs.append({"name": path, "type":str(type(e).__name__), "desc": str(e)})
-				sys.stdout.write(f"\n")
+				sys.stdout.write("\n")
 				if args.verbose:
 					traceback.print_exc(file=sys.stdout)
-				logging.debug(e)
+				logger.debug(e)
 				if "PermissionError" in type(e).__name__:
-					logging.warning(f"{colored_no_entry} Permission denied: '{GREY}{path}{RESET}'")
+					logger.warning(f"{colored_no_entry} Permission denied: '{GREY}{path}{RESET}'")
 				elif "OSError" in type(e).__name__:
-					logging.warning(f"🚫 Access error: '{GREY}{path}{RESET}'")
+					logger.warning(f"🚫 Access error: '{GREY}{path}{RESET}'")
 				elif "FileNotFoundError" in type(e).__name__:
-					logging.warning(f"❔ File not found: '{GREY}{path}{RESET}'")
+					logger.warning(f"❔ File not found: '{GREY}{path}{RESET}'")
 				elif "IsADirectoryError" in type(e).__name__: # Skip junctions
-					logging.warning(f"🛤️ Junction skipped: '{GREY}{path}{RESET}'")
+					logger.warning(f"🛤️ Junction skipped: '{GREY}{path}{RESET}'")
 				elif "NotADirectoryError" in type(e).__name__:
-					logging.warning(f"🚧 Not a directory: '{GREY}{path}{RESET}'")
+					logger.warning(f"🚧 Not a directory: '{GREY}{path}{RESET}'")
 				elif "FileExistsError" in type(e).__name__: # Skip symbolic links
-					logging.warning(f"🔗 Symbolic link skipped: '{GREY}{path}{RESET}'")
+					logger.warning(f"🔗 Symbolic link skipped: '{GREY}{path}{RESET}'")
 				else:
-					logging.warning(f"{colored_x} Error: '{GREY}{path}{RESET}' due to {e}")
+					logger.warning(f"{colored_x} Error: '{GREY}{path}{RESET}' due to {e}")
 
 				tree.append({
 					"name": folder_name, # Folder name
@@ -1286,7 +1286,7 @@ def get_folder_structure(path, progress_bar=None, error_logs=None, no_attributes
 		if progress_bar:
 			progress_bar.update(1)
 			dyn_tqdm.set_description(f"🕵️ | {'🪄 Magika' if use_magika else '🔮 Magic'}: {magic_scanned} | 📏 Total: {humanize.naturalsize(sum_size, binary=True)} ")
-			
+
 			attributes = get_file_attributes(entry.path) if not no_attributes else None
 			'''if entry.is_junction(): # path is a junction
 				tree.append({
@@ -1299,7 +1299,7 @@ def get_folder_structure(path, progress_bar=None, error_logs=None, no_attributes
 					"ctime": entry.stat(follow_symlinks=False).st_ctime, # junction creation time
 					"atime": entry.stat(follow_symlinks=False).st_atime, # junction access time
 				})'''
-			
+
 			if entry.is_symlink(): # path is a symbolic link
 				tree.append({
 					"name": entry.name, # Symbolic link name
@@ -1334,24 +1334,24 @@ def get_folder_structure(path, progress_bar=None, error_logs=None, no_attributes
 				except Exception as e:
 					denied_folders += 1
 					error_logs.append({"name": path, "type":str(type(e).__name__), "desc": str(e)})
-					sys.stdout.write(f"\n")
+					sys.stdout.write("\n")
 					if logger.isEnabledFor(logging.DEBUG):
 						traceback.print_exc(file=sys.stdout)
-					logging.debug(e)
+					logger.debug(e)
 					if "PermissionError" in type(e).__name__:
-						logging.warning(f"{colored_no_entry} Permission denied: '{GREY}{path}{RESET}'")
+						logger.warning(f"{colored_no_entry} Permission denied: '{GREY}{path}{RESET}'")
 					elif "OSError" in type(e).__name__:
-						logging.warning(f"{colored_no_entry} Access error: '{GREY}{path}{RESET}'")
+						logger.warning(f"{colored_no_entry} Access error: '{GREY}{path}{RESET}'")
 					elif "FileNotFoundError" in type(e).__name__:
-						logging.warning(f"❔ File not found: '{GREY}{path}{RESET}'")
+						logger.warning(f"❔ File not found: '{GREY}{path}{RESET}'")
 					elif "IsADirectoryError" in type(e).__name__: # Skip junctions
-						logging.warning(f"🛤️ Junction skipped: '{GREY}{path}{RESET}'")
+						logger.warning(f"🛤️ Junction skipped: '{GREY}{path}{RESET}'")
 					elif "NotADirectoryError" in type(e).__name__:
-						logging.warning(f"🚧 Not a directory: '{GREY}{path}{RESET}'")
+						logger.warning(f"🚧 Not a directory: '{GREY}{path}{RESET}'")
 					elif "FileExistsError" in type(e).__name__: # Skip symbolic links
-						logging.warning(f"🔗 Symbolic link skipped: '{GREY}{path}{RESET}'")
+						logger.warning(f"🔗 Symbolic link skipped: '{GREY}{path}{RESET}'")
 					else:
-						logging.warning(f"{colored_x} Error: '{GREY}{path}{RESET}' due to {e}")
+						logger.warning(f"{colored_x} Error: '{GREY}{path}{RESET}' due to {e}")
 
 					tree.append({
 						"name": entry.name, # Folder name
@@ -1373,10 +1373,10 @@ def get_folder_structure(path, progress_bar=None, error_logs=None, no_attributes
 			elif entry.is_file(follow_symlinks=False): # path is a file
 				try:
 					file_size = entry.stat().st_size
-					total_size += file_size	
+					total_size += file_size
 					# mime_type, _ = mimetyp	es.guess_type(entry.path)
 					mime_type = get_mime_type(entry.path, magic_max_size, force_magic, use_magika)
-					
+
 					tree.append({
 						"name": entry.name, # File name
 						"path": entry.path,
@@ -1392,16 +1392,16 @@ def get_folder_structure(path, progress_bar=None, error_logs=None, no_attributes
 					error_logs.append({"name": path, "type": str(type(e).__name__), "desc": str(e)})
 					if args.verbose:
 						traceback.print_exc(file=sys.stdout)
-					logging.warning(e)
+					logger.warning(e)
 					tree.append({
 						"name": entry.name,
 						"path": entry.path,
 						"type": "file",
 						"mime": str(type(e).__name__),
-						"size": 0, 
+						"size": 0,
 						"attr": get_file_attributes(entry.path) if not no_attributes else None,
 						"mtime": 0,
-						"ctime": 0, 
+						"ctime": 0,
 						"atime": 0,
 					})
 				scanned_files += 1
@@ -1429,11 +1429,15 @@ def save_json_tree(path_to_scan, output_file="folder_structure.json.bz2", simula
 	Raises:
 		KeyboardInterrupt: If the operation is interrupted by the user.
 	"""
-
+	global last_opened_json
 	start_time = time.time()
 	absolute_path = os.path.abspath(path_to_scan)
 	# total_items = sum([len(files) + len(dirs) for _, dirs, files in tqdm(os.walk(path_to_scan), desc="🥷 Scanning Directories", unit=" dir", smoothing=1.0)])
 	# Calculate total items
+
+	config["tree_util"] = {"last_scan_dir": absolute_path, "last_opened_json": last_opened_json}
+	with open(config_file, "w") as conf:
+		config.write(conf)
 
 	def count_items_in_directory(directory):
 		"""Count total items (files and subdirectories) in a directory."""
@@ -1482,10 +1486,10 @@ def save_json_tree(path_to_scan, output_file="folder_structure.json.bz2", simula
 					except ZeroDivisionError:
 						search_rate = 0
 						avg_dir = 0
-			
+
 			total_items = dirs_count + files_count
 	else:
-		total_items = 0	
+		total_items = 0
 
 	global dyn_tqdm, scanned_files, scanned_folders, sum_size, denied_folders
 	scanned_files = 0
@@ -1494,7 +1498,7 @@ def save_json_tree(path_to_scan, output_file="folder_structure.json.bz2", simula
 	sum_size = 0
 	try:
 		if use_threads:
-			title(f"🕸️ Scanning... - Tree Spider")
+			title_console(f"🕸️ Scanning... - Tree Spider")
 			print("🕷️ Scanning files...")
 			print("🧵 Using threads... (Progress bar may not work properly)")
 			global progress, progress_lock, progress_bar
@@ -1503,7 +1507,7 @@ def save_json_tree(path_to_scan, output_file="folder_structure.json.bz2", simula
 			with tqdm(total=total_items, desc="🕷️ Scanning files...", unit="files") as progress_bar:
 				structure, total_size, scanned_files, scanned_folders, denied_folders = get_folder_structure_threaded(path_to_scan, progress_bar=progress_bar, error_logs=error_logs, no_attributes=no_attributes, magic_max_size=magic_max_size, force_magic=force_magic, use_magika=use_magika)
 		else:
-			title(f"📈 Scanning... - Tree Spider")
+			title_console(f"📈 Scanning... - Tree Spider")
 			print("🕵️ Scanning files...")
 			dyn_tqdm = tqdm(total=total_items,  unit=" files", smoothing=1.0)
 			with dyn_tqdm as progress_bar:
@@ -1517,8 +1521,8 @@ def save_json_tree(path_to_scan, output_file="folder_structure.json.bz2", simula
 	print(f" 📄 Total Files: {humanize.intcomma(scanned_files)} | 📂 Total Folders: {humanize.intcomma(scanned_folders)} | 📏 Total Size: {humanize.naturalsize(total_size, binary=True)}")
 	print(f" ⏱️ Time Taken: {format_duration(end_time - start_time)}\n")
 
-	title(f"📝 Enter a note - Tree Spider")
-	if not args.simulate and timed_choice("📝 Enter a note for the report? ", 10, False):
+	title_console(f"📝 Enter a note - Tree Spider")
+	if not args.simulate and timed_choice("📝 Enter a note for the report? ", 10, False, "⏭️ Skipped. You can edit the note later."):
 			# not a command, so input prompts is pilcrow
 			try:
 				user_note = input("¶ ")
@@ -1526,14 +1530,13 @@ def save_json_tree(path_to_scan, output_file="folder_structure.json.bz2", simula
 				user_note = ""
 	else:
 		user_note = ""
-		print("⏭️ Skipped. You can edit the note later.")
 
 	try:
 		partition = get_partition_from_path(absolute_path).fstype
 	except Exception as p:
 		error_logs.append({"name":"partition", "type":str(type(p).__name__), "desc": str(p)})
 		partition = str(type(p).__name__)
-	
+
 	data = { # metadata
 		"user_note": user_note,
 		"error_logs": error_logs,
@@ -1565,8 +1568,8 @@ def save_json_tree(path_to_scan, output_file="folder_structure.json.bz2", simula
 
 	if simulate:
 		print(f"⏭️ Skipping writing file...")
-	else:	
-		title(f"🗜️ Compressing JSON... - Tree Spider")
+	else:
+		title_console(f"🗜️ Compressing JSON... - Tree Spider")
 		print(f"\n🗜️ Compressing JSON...")
 		spinner = Spinner()
 		spinner.start() # small spinner animation, but works well
@@ -1579,31 +1582,41 @@ def save_json_tree(path_to_scan, output_file="folder_structure.json.bz2", simula
 		finally:
 			spinner.stop()
 			print(f"📦 JSON has compressed by {round(os.path.getsize(output_file) / get_size_of(data) * 100, 2)} % | {humanize.naturalsize(get_size_of(data), binary=True)} ({humanize.intcomma(get_size_of(data))} bytes) -> {humanize.naturalsize(os.path.getsize(output_file), binary=True)} ({humanize.intcomma(os.path.getsize(output_file))} bytes) ")
-	
-	return end_time - start_time # return time taken
-def get_top_n_largest_files(node, n, files=None):
-	""" Get the top n largest files in a directory tree."""
-	if files == None:
-		files = []
-	for item in node:
-		if item["type"] == "file" or item["type"] == "symlink" or item["type"] == "junction":
-			files.append(item)
-		elif item["type"] == "folder":
-			get_top_n_largest_files(item["children"], n, files)
-	return sorted(files, key=lambda x: x["size"], reverse=True)[:n]
 
-def get_top_n_large_folders(node, n, folders=None):	
-	""" Get the top n largest folders in a directory tree."""
-	if folders == None:
-		folders = []
-	
+	return end_time - start_time # return time taken
+def get_top_n_largest_files(node, n, heap=None):
+	"""Get the top n largest files in a directory tree efficiently."""
+	if heap is None:
+		heap = []
+
+	for item in node:
+		if item["type"] in {"file", "symlink", "junction"}:
+			# Use (size, path, item) to ensure uniqueness and avoid comparison issues
+			heapq.heappush(heap, (item["size"], item["path"], item))
+			if len(heap) > n:
+				heapq.heappop(heap)  # Remove the smallest file to keep only top `n`
+		elif item["type"] == "folder":
+			get_top_n_largest_files(item["children"], n, heap)
+
+	return [x[2] for x in sorted(heap, key=lambda x: x[0], reverse=True)]
+
+def get_top_n_large_folders(node, n, heap=None):
+	"""Get the top n largest folders in a directory tree efficiently."""
+	if heap is None:
+		heap = []
+
 	for item in node:
 		if item["type"] == "folder":
-			folders.append(item)
-			get_top_n_large_folders(item["children"], n, folders)
-		elif item["type"] == "file" or item["type"] == "symlink" or item["type"] == "junction":
-			pass
-	return sorted(folders, key=lambda x: x["size"], reverse=True)[:n]
+			# Push the folder into the heap, maintaining at most `n` largest folders
+			heapq.heappush(heap, (item["size"], item["path"], item))
+			if len(heap) > n:
+				heapq.heappop(heap)  # Remove the smallest folder to keep only top `n`
+
+			get_top_n_large_folders(item["children"], n, heap)
+
+	# Extract sorted result
+	return [x[2] for x in sorted(heap, key=lambda x: x[0], reverse=True)]
+
 
 def get_top_n_recent_files(node, n, files=None, mode="new", key="mtime"):
 	""" Get the top n recent files in a directory tree."""
@@ -1654,43 +1667,51 @@ def search_files_regex(node, query, results=None):
 			search_files_regex(item["children"], query, results)
 	return results
 
-def search_duplicates(node, file_map=None):
-	"""Search for duplicate files in a directory tree based on name and size."""
-	if file_map is None:
-		file_map = defaultdict(list)  # Dictionary to store files by (name, size)
-	
+def search_duplicates(node, seen_files=None, duplicates=None):
+	"""Efficiently search for duplicate files by name and size."""
+	if seen_files is None:
+		seen_files = {}
+	if duplicates is None:
+		duplicates = []
+
 	for item in node:
 		if item["type"] == "file":
-			key = (item["name"], item["size"])
-			file_map[key].append(item)
-		elif item["type"] == "folder":  # Recursive call for subdirectories
-			search_duplicates(item["children"], file_map)
-	
-	# Return only duplicate files (i.e., keys with more than one entry)
-	return {k: v for k, v in file_map.items() if len(v) > 1}
+			key = (item["name"], item["size"])  # Consider both name and size
 
+			if key in seen_files:
+				if len(seen_files[key]) == 1:  # Ensure original is stored only once
+					duplicates.append(seen_files[key][0])
+				duplicates.append(item)
+				seen_files[key].append(item)
+			else:
+				seen_files[key] = [item]
+
+		elif item["type"] == "folder":
+			search_duplicates(item["children"], seen_files, duplicates)
+
+	return sorted(duplicates, key=lambda x: x["name"])
 
 def get_most_common_file_extensions(node, mode="freq", extensions=None, total_size=None, total_files=None):
 	""" Get the top frequent extensions and sizes in a directory tree."""
 	if extensions is None:
-		extensions = {} # store extensions
+		extensions = defaultdict(lambda: [0, 0])  # [frequency, size]
 	if total_size is None:
-		total_size = sum([item["size"] for item in node if item["type"] == "file"])
+		total_size = sum(item["size"] for item in node if item["type"] == "file")
 	if total_files is None:
-		total_files = len([item for item in node if item["type"] == "file"])
-	
+		total_files = sum(1 for item in node if item["type"] == "file")
+
 	for item in node:
 		if item["type"] == "file":
 			extension = os.path.splitext(item["name"])[1]
 			size = item["size"]
-			# Append extension (frequency, sizes), sum sizes
-			if extension in extensions:
-				# increment frequency, add size, calculate percentage
-				extensions[extension] = (extensions[extension][0] + 1), (extensions[extension][1] + size), (extensions[extension][1] / total_size), (extensions[extension][0] / total_files)
-			else:
-				extensions[extension] = (1, size, (size / total_size), (1 / total_files))
-		elif item["type"] == "folder": # recursive search for files
+			extensions[extension][0] += 1  # increment frequency
+			extensions[extension][1] += size  # add size
+		elif item["type"] == "folder":
 			get_most_common_file_extensions(item["children"], mode, extensions, total_size, total_files)
+
+	# Convert extensions to a dictionary of tuples and add percentage info
+	extensions = {ext: (freq, size, size / total_size, freq / total_files) for ext, (freq, size) in extensions.items()}
+
 	# Sort by frequency or size
 	if mode == "name":
 		return sorted(extensions.items(), key=lambda x: x[0])
@@ -1700,7 +1721,6 @@ def get_most_common_file_extensions(node, mode="freq", extensions=None, total_si
 		return sorted(extensions.items(), key=lambda x: x[1][0], reverse=True)
 	else:
 		return sorted(extensions.items(), key=lambda x: x[1][0], reverse=True)
-	return extensions
 
 
 
@@ -1723,8 +1743,8 @@ def convert_markdown_with_external_css(md_text):
 	"""
 	Convert Markdown text to styled HTML with an external CSS.
 
-	This function takes a Markdown text string as input and converts it to HTML. 
-	The resulting HTML includes a style block to apply basic styling to tables, 
+	This function takes a Markdown text string as input and converts it to HTML.
+	The resulting HTML includes a style block to apply basic styling to tables,
 	headers, and other elements.
 
 	Args:
@@ -1733,7 +1753,6 @@ def convert_markdown_with_external_css(md_text):
 	Returns:
 		str: The HTML representation of the Markdown text with applied styling.
 	"""
-
 	body = markdown.markdown(md_text, extensions=['tables'])
 	style = """table {\n	border-collapse: collapse;\n	width: 100%;\n	will-change: transform;\n}\n
 th, td {\n	border: 1px solid black;\n	padding: 8px;\n	text-align: left;\n}\n
@@ -1761,13 +1780,13 @@ def save_result_as_markdown(result, output_file="result.md", query=""):
 	write_lines.append(f"| 📂 Total Folders | {len([item for item in result if item['type'] == 'folder'])} |")
 	write_lines.append(f"| 🔗 Total Links | {len([item for item in result if item['type'] == 'symlink'])} |")
 	write_lines.append(f"| 📊 Total Items | {len(result)} |")
-	
+
 	write_lines.append(f"## Files\n")
 	write_lines.append(f"| # | Name | Size | MIME | Path | Date Modified | Date Created | Date Accessed |")
 	write_lines.append(f"|---|------|------|------|------|---------------|--------------|---------------|")
 	for index, item in enumerate(result):
 		write_lines.append(f"| {index + 1} | {item['name']} | {humanize.naturalsize(item['size'], binary=True)} | {item.get('mime', 'N/A')} | {item['path']} | {seconds_to_datetime(item['mtime'])} | {seconds_to_datetime(item['ctime'])} | {seconds_to_datetime(item['atime'])} |")
-	
+
 	# Write to file
 	output_file = repl_str_for_path(output_file)
 	with open(output_file, "w") as f:
@@ -1791,25 +1810,25 @@ def browse_json_tree(json_file):
 	if not os.path.exists(json_file):
 		raise FileNotFoundError(f"JSON file not found: {json_file}")
 
-	title(f"⏳ Loading JSON... - Tree Spider")
+	title_console(f"⏳ Loading JSON... - Tree Spider")
 
 	spinner = Spinner(char="emoji_moon2")
 	spinner.start() # small spinner animation, but works well
 	try:
 		data = bz2_load_to_json(json_file)
-		
+
 		print("\n🧐 Parsing...")
 
-		
+
 		structure = data["structure"] # The most important part of the data
 
 	except KeyboardInterrupt:
 			print(f"{colored_stop} Interrupted by user.")
 	finally:
 		spinner.stop()
-	
+
 	# set last opened json
-	config["tree_util"] = {"last_opened_json": json_file}
+	config["tree_util"] = {"last_opened_json": json_file, "last_scan_dir": last_scan_dir}
 	with open(config_file, "w") as conf:
 		config.write(conf)
 
@@ -1830,7 +1849,7 @@ def browse_json_tree(json_file):
 			byte = int(size)
 		bits = int((size - int(size))*8)
 		return f"{byte} byte{plural(size)} + {bits} bit{plural(bits)}" if bits > 0 else f"{byte} byte{plural(size)}"
-	
+
 	def generate_report(data):
 		""" Generate a report from the data.  """
 		# Retrieve Report Info
@@ -1967,7 +1986,7 @@ def browse_json_tree(json_file):
 		print("\n")
 
 	# Properties for root directory
-	global depth_dir_info	
+	global depth_dir_info
 	depth_dir_info = [{
 		"name": "<rootdir>",
 		"type": "folder",
@@ -1981,9 +2000,10 @@ def browse_json_tree(json_file):
 		"folders": data.get("scanned_folders"),
 		"access_denied": False
 	}]
-	def navigate(node, path="/", navigation_mode="browse", selected=None):
+	def navigate(node, path="/", navigation_mode="browse", selected=None, emoji=None, column="size", title=None):
 		"""Navigate through a directory tree."""
 		depth = len(path.split("/")) - 2
+		
 
 		def print_cd(path="/", file="", emoji=None):# Get terminal width
 			""" Print the current directory."""
@@ -1998,24 +2018,40 @@ def browse_json_tree(json_file):
 					emoji = "🏆"
 				else:
 					emoji = "📂"
-			logging.debug(f"{depth_dir_info}\n🪜 Depth: {depth}\n")
+			logger.debug(f"\n📂 Dir: {GREY}{depth_dir_info}{RESET}\n🪜 Depth: {depth}\n")
 			# return (f"	📂 Current Directory: {path}\n" + "-" * shutil.get_terminal_size().columns + "\n")
 			breadcrumbs_arrow = ' > '
 			backslash = '\\'
-			return (f"	{emoji}{shorten_string(path+file,shutil.get_terminal_size().columns * 1 / 2).replace('/', breadcrumbs_arrow).replace(backslash, breadcrumbs_arrow)}\n" + "-" * shutil.get_terminal_size().columns + "\n")
+			return (f"	{emoji} {shorten_string(path+file,shutil.get_terminal_size().columns * 1 / 2).replace('/', breadcrumbs_arrow).replace(backslash, breadcrumbs_arrow)}\n" + "-" * shutil.get_terminal_size().columns + "\n")
 
-		def print_dir(path="/", depth=0):
+		def print_dir(path="/", depth=0, column="size"):
 			""" Print a directory."""
+			title_console(f"{get_folder_icon(depth_dir_info[depth]['name'])} {path.split('/')[-2] if not path == '/' else path} - Tree Spider")
 			dir_count = 0
 			file_count = 0
 			print_list = []
-			print_list.append("#	   Size		Name")
-			print_list.append("-	   ----		----")
-			print_list.append(f"[`]	⤴  {BOLD}{humanize.naturalsize(depth_dir_info[depth]['size'], binary=True)}	\033[1m../{RESET}")
+			if title != None:
+				print_list.append(title)
+			if column == "size":
+				print_list.append("#	   Size		Name")
+				print_list.append("-	   ----		----")
+			elif column == "mtime":
+				print_list.append("#	   mTime	Name")
+				print_list.append("-	   ----		----")
+			elif column == "ctime":
+				print_list.append("#	   cTime	Name")
+				print_list.append("-	   ----		----")
+			elif column == "atime":
+				print_list.append("#	   aTime	Name")
+				print_list.append("-	   ----		----")
+			elif column == "path":
+				print_list.append("#	   Size 	Path")
+				print_list.append("-	   ----		----")
+			print_list.append(f"[0]	🔙  {BOLD}{humanize.naturalsize(depth_dir_info[depth]['size'], binary=True)}	\033[1m../{RESET}")
 			if depth_dir_info[depth]["access_denied"]:
 				print_list.append(f"\n	{colored_no_entry} Access denied: {depth_dir_info[depth]['access_denied']}")
-
-			for i, item in enumerate(node):
+			# Change by column
+			for i, item in enumerate(node, start=1):
 				# If the file is hidden, show in grey
 				if item["name"].startswith(".") or item["attr"].count("Hidden") > 0:
 					grey_start = GREY
@@ -2023,24 +2059,43 @@ def browse_json_tree(json_file):
 				else:
 					grey_start = ""
 					grey_end = ""
-				if item["type"] == "junction":
+				if column == "size":
+					if item["type"] == "folder":
+						print_list.append(f"[{i}]	{grey_start}{get_folder_icon(item['name'], )} {humanize.naturalsize(item['size'], binary=True)}	{grey_end}{item['name']}")
+					else:
+						print_list.append(f"[{i}]	{grey_start}{get_file_icon(item['name'], item['mime'])} {humanize.naturalsize(item['size'], binary=True)}	{grey_end}{item['name']}")
+				elif column == "mtime":
+					if item["type"] == "folder":
+						print_list.append(f"[{i}]	{grey_start}{get_folder_icon(item['name'])} {item['mtime']}	{grey_end}{item['name']}")
+					else:
+						print_list.append(f"[{i}]	{grey_start}{get_file_icon(item['name'], item['mime'])} {item['mtime']}	{grey_end}{item['name']}")
+				elif column == "ctime":
+					if item["type"] == "folder":
+						print_list.append(f"[{i}]	{grey_start}{get_folder_icon(item['name'])} {item['ctime']}	{grey_end}{item['name']}")
+					else:
+						print_list.append(f"[{i}]	{grey_start}{get_file_icon(item['name'], item['mime'])} {item['ctime']}	{grey_end}{item['name']}")
+				elif column == "atime":
+					if item["type"] == "folder":
+						print_list.append(f"[{i}]	{grey_start}{get_folder_icon(item['name'])} {item['atime']}	{grey_end}{item['name']}")
+					else:
+						print_list.append(f"[{i}]	{grey_start}{get_file_icon(item['name'], item['mime'])} {item['atime']}	{grey_end}{item['name']}")
+				elif column == "path":
+					if item["type"] == "folder":
+						print_list.append(f"[{i}]	{grey_start}{get_folder_icon(item['name'])} {humanize.naturalsize(item['size'], binary=True)}	{grey_end}{item['path']}")
+					else:
+						print_list.append(f"[{i}]	{grey_start}{get_file_icon(item['name'], item['mime'])} {humanize.naturalsize(item['size'], binary=True)}	{grey_end}{item['path']}")
+				if item["type"] == "folder":
 					dir_count += 1
-					print_list.append(f"{grey_start}[{i}]	🛤️{BOLD} {humanize.naturalsize(item['size'], binary=True)}	{shorten_string(item['name'], shutil.get_terminal_size().columns * 1 / 2, '…')}/{RESET}{grey_end}")
-				elif item["type"] == "symlink":
-					dir_count += 1
-					print_list.append(f"{grey_start}[{i}]	🌀{BOLD} {humanize.naturalsize(item['size'], binary=True)}	{shorten_string(item['name'], shutil.get_terminal_size().columns * 1 / 2, '…')}/{RESET}{grey_end}")
-				elif item["type"] == "folder":
-					dir_count += 1
-					print_list.append(f"{grey_start}[{i}]	{get_folder_icon(item['name'])}{BOLD} {humanize.naturalsize(item['size'], binary=True)}	{shorten_string(item['name'], shutil.get_terminal_size().columns * 1 / 2, '…')}/{RESET}{grey_end}")
 				else:
 					file_count += 1
-					print_list.append(f"{grey_start}[{i}]	{get_file_icon(item['name'], item['mime'])} {humanize.naturalsize(item['size'], binary=True)}	{shorten_string(item['name'], shutil.get_terminal_size().columns * 1 / 2, '…')}{grey_end}")
 			print_list.append(f"\n	📁 Directories: {dir_count} | 📃 Files: {file_count}")
 			return print_list
 		def print_file_info(selected):
 			""" Print information about a file."""
 			try:
+				title_console(f"{get_file_icon(selected.get('name'), selected.get('mime'))} {selected.get('name')} - Tree Spider")
 				now = time.time()
+				logger.debug(f"📃 Selected file: {GREY}{selected}{RESET}")
 				print(print_cd(path, selected.get('name')))
 				print(f"{get_file_icon(selected.get('name'), selected.get('mime'))} File Information:\n")
 				print(f" 📛 Name:	{selected.get('name')}\n")
@@ -2052,11 +2107,12 @@ def browse_json_tree(json_file):
 				print(f" 👀 Accessed:	{seconds_to_datetime(selected.get('atime', 0))}	[{humanize.naturaltime(now - selected.get('atime', 0))}]\n")
 				print(f" 🪄 Attributes:	{', '.join(selected.get('attr'))}\n")
 			except KeyError as e:
-				logging.warning(f"{colored_warn} Unknown key: {e}")
+				logger.warning(f"{colored_warn} Unknown key: {e}")
 
 		def print_dir_info(dir_info):
 			""" Print information about a directory."""
 			try:
+				title_console(f"{get_folder_icon(dir_info['name'])} {dir_info['name']} - Tree Spider")
 				now = time.time()
 				print(print_cd(path))
 				print(f"{get_folder_icon(path)} Directory Information: {path}\n")
@@ -2076,10 +2132,11 @@ def browse_json_tree(json_file):
 				print(f" 🪄 Attributes:		{', '.join(dir_info.get('attr'))}\n")
 
 			except KeyError as e:
-				logging.warning(f"{colored_warn} Unknown key: {e}")
+				logger.warning(f"{colored_warn} Unknown key: {e}")
 
 		def print_link_info(link_info):
 			try:
+				title_console(f"🐝 {selected['name']} - Tree Spider")
 				now = time.time()
 				print(print_cd(path, selected.get('name')))
 				print(f"{'🌀' if selected.get('type') == 'symlink' else '🛤️'} File Information:\n")
@@ -2092,109 +2149,11 @@ def browse_json_tree(json_file):
 				print(f" 👀 Accessed:	{seconds_to_datetime(selected.get('atime'))}	[{humanize.naturaltime(now - link_info.get('atime', 0))}]\n")
 				print(f" 🪄 Attributes:	{', '.join(selected.get('attr'))}\n")
 			except KeyError as e:
-				logging.warning(f"{colored_warn} Unknown key: {e}")
+				logger.warning(f"{colored_warn} Unknown key: {e}")
 
-		def search_result(results, query, sort_by="size", emoji="🔍"):
-			results_list = []
-			def print_results(results, results_list=None):
-				if results_list == None:
-					results_list = []
-				if not results:
-					print(f"{colored_no_entry} No results found.")
-					return
-				if sort_by == "size":
-					for i, item in enumerate(results, start=1):
-						if item["type"] == "folder" or item["type"] == "symlink" or item["type"] == "junction":
-							results_list.append(f"[{i}]	{get_folder_icon(item['name'])} {humanize.naturalsize(item['size'], binary=True)}	{shorten_string(item['name'], shutil.get_terminal_size().columns * 1 / 3)}")
-						elif item["type"] == "file":
-							results_list.append(f"[{i}]	{get_file_icon(item['name'], item['mime'])} {humanize.naturalsize(item['size'], binary=True)}	{shorten_string(item['name'], shutil.get_terminal_size().columns * 1 / 2)}")
-				elif sort_by == "mtime":
-					for i, item in enumerate(results, start=1):
-						if item["type"] == "folder" or item["type"] == "symlink" or item["type"] == "junction":
-							results_list.append(f"[{i}]	{get_folder_icon(item['name'])} {seconds_to_datetime(item['mtime'])}	{shorten_string(item['name'], shutil.get_terminal_size().columns * 1 / 3)}")
-						elif item["type"] == "file":
-							results_list.append(f"[{i}]	{get_file_icon(item['name'], item['mime'])} {seconds_to_datetime(item['mtime'])}	{shorten_string(item['name'], shutil.get_terminal_size().columns * 1 / 2)}")
-				elif sort_by == "ctime":
-					for i, item in enumerate(results, start=1):
-						if item["type"] == "folder" or item["type"] == "symlink" or item["type"] == "junction":
-							results_list.append(f"[{i}]	{get_folder_icon(item['name'])} {seconds_to_datetime(item['ctime'])}	{shorten_string(item['name'], shutil.get_terminal_size().columns * 1 / 3)}")
-						elif item["type"] == "file":
-							results_list.append(f"[{i}]	{get_file_icon(item['name'], item['mime'])} {seconds_to_datetime(item['ctime'])}	{shorten_string(item['name'], shutil.get_terminal_size().columns * 1 / 2)}")
-				elif sort_by == "atime":
-					for i, item in enumerate(results, start=1):
-						if item["type"] == "folder" or item["type"] == "symlink" or item["type"] == "junction":
-							results_list.append(f"[{i}]	{get_folder_icon(item['name'])} {seconds_to_datetime(item['atime'])}	{shorten_string(item['name'], shutil.get_terminal_size().columns * 1 / 3)}")
-						elif item["type"] == "file":
-							results_list.append(f"[{i}]	{get_file_icon(item['name'], item['mime'])} {seconds_to_datetime(item['atime'])}	{shorten_string(item['name'], shutil.get_terminal_size().columns * 1 / 2)}")
-				return results_list
-			while True:
-				clear_screen()
-				title(f"🔎 Results for {query} - Tree Spider")
-				print(print_cd(path, emoji))
-				print(f"\n	🎯 Search Results for {query} - {len(results)} matched\n")
-				if sort_by == "size":
-					print("#	   Size		Name	")
-					print("-	   ----		----	")
-				elif sort_by == "mtime":
-					print("#	   Mtime		Name	")
-					print("-	   ----		----	")
-				elif sort_by == "ctime":
-					print("#	   Ctime		Name	")
-					print("-	   ----		----	")
-				elif sort_by == "atime":
-					print("#	   Atime		Name	")
-					print("-	   ----		----	")
-				print("\n".join(print_results(results)))
-				print("\n📍 Enter the number to navigate, '/back' or .. to go back, '/save' to save as markdown.")
-				try:
-					choice = input("\n>>> ").strip().lower()
-				except KeyboardInterrupt:
-					print(f"{colored_stop} Exiting...")
-					return
-				if choice == "":
-					continue
-				elif choice == "/back" or choice == "..":
-					break
-				elif choice == "/save":
-					print(f"\n📝 Saving search results as markdown...")
-					output_file = f"{scan_log_dir}/tree_util_search_result_{query}.md"
-					spinner = Spinner()
-					spinner.start()
-					try:
-						save_result_as_markdown(results, output_file=output_file, query=query)
-					except KeyboardInterrupt:
-						print(f"{colored_stop} Exiting...")
-						return
-					finally:
-						spinner.stop()
-						print(f"\n{colored_check} Saved search results as markdown: {output_file}\n")
-					pause()
-				elif choice.isdigit() and 0 < int(choice) <= len(results):
-					selected = results[int(choice) - 1]
-					clear_screen()
-					if selected["type"] == "folder" or selected["type"] == "symlink" or selected["type"] == "junction":
-						set_nth_list(depth_dir_info, depth+1, 
-					{
-						"name": selected.get("name"),
-						"path": selected.get("path"),
-						"type": selected.get("type"),
-						"size": selected.get("size"),
-						"attr": selected.get("attr"),
-						"ctime": selected.get("ctime"),
-						"mtime": selected.get("mtime"),
-						"atime": selected.get("atime"),
-						"files": selected.get("files"),
-						"folders": selected.get("folders"),
-						"access_denied": selected.get("access_denied")
-					}
-					)
-						navigate(selected["children"], path + selected["name"] + "/", navigation_mode="search")
-					elif selected["type"] == "file":
-						title(f"🍎 {selected['name']} - Tree Spider")
-						print_file_info(selected)
-						pause(exit_message=f"{colored_stop} Exiting...")
-				
+
 		def open_file(choice, node):
+			global error_message
 			if choice.isdigit() and 0 <= int(choice) < len(node):
 				run_path = node[int(choice)]["path"].replace('/', '\\')
 				cmd = ["start", '""', f'"{run_path}"'] if os.name == "nt" else ['xdg-open', f'"{node[int(choice)]["path"]}"']
@@ -2216,17 +2175,17 @@ def browse_json_tree(json_file):
 				clear_screen()
 
 		def edit_report_user_note():
-			title("📝 Edit Notes - Tree Spider")
+			title_console("📝 Edit Notes - Tree Spider")
 			print(print_cd(path))
 			print(report_info, "\n")
 
 			print("\n	📝 Edit Notes (CTRL+C to discard)\n")
-			
+
 			edit_user_note = input("\n¶ ").strip()
 			if not edit_user_note == "":
 				data["user_note"] = edit_user_note
 
-				title(f"🗜️ Compressing JSON... - Tree Spider")
+				title_console(f"🗜️ Compressing JSON... - Tree Spider")
 				print(f"\n🗜️ Updating JSON...")
 				spinner = Spinner()
 				spinner.start() # small spinner animation, but works well
@@ -2254,19 +2213,18 @@ def browse_json_tree(json_file):
 
 		while True:
 			global error_message
-
 			clear_screen()
 
-			title(f"🌳 { path.split('/')[-2] if not path == '/' else path} - Tree Spider")
+			# To append path, use navigate(node, path=path + <name>) function
 
 
-			print(print_cd(path))
-			print("\n".join(print_dir(path, depth)))
-		
+			print(print_cd(path, emoji=emoji))
+			print("\n".join(print_dir(path, depth, column)))
+
 			# print(f"🌲 Depth: {depth}")
 			print(f"\n📍 Enter the navigation number, '{GREY}..{RESET}' to return, '{GREY}/help{RESET}', '{GREY}/h{RESET}' or '{GREY}/?{RESET}' for help.")
 
-					
+
 			# Display an error message
 			if not error_message == "":
 				print(error_message)
@@ -2279,25 +2237,25 @@ def browse_json_tree(json_file):
 					print(f"{colored_stop} Exiting...")
 				depth_dir_info.pop()
 				return
-			if choice == ".." or choice == "/back" or choice == "`":
+			if choice == ".." or choice == "/back" or choice == "0":
 				# print(f"🔙 Going back..." if not depth==0 else print(f"{colored_stop} Exiting..."))
 				depth_dir_info.pop()
 				return
 
 			elif choice == "/help" or choice == "/h" or choice == "/?":
 				clear_screen()
-				title("💡 Help - Tree Spider")
+				title_console("💡 Help - Tree Spider")
 				print(print_cd(path))
 				print("\n💡 Command List\n")
 				print(" [NUMBER]	🪜 Navigates to the specified file or directory ")
 				print(" CTRL + C	🛑 Returns to the previous directory or exits the program if you are in the root directory.\n")
+				print(" /exit /quit /q CTRL + Z\n		🚪 Quits this program")
 				print(" /help /h /?	💡 Displays this help message\n")
 				print(" .. /back	🔙 Returns to the previous directory")
 				print(" /dir /d	📂 Displays the properties of the current directory")
 				print(" /dup /u	🪞 Displays duplicate files in the current directory")
 				print(" /empty /ed	🗑️ Displays empty directories in the current directory")
 				print(" /error /e	🚨 Displays error message logs from the snapshot report")
-				print(" /exit /quit /q	🚪 Quits this program")
 				print(" /ext /x [%s]\n" % ", ".join(valid_ext_keys), "		📎 Displays the most common file extensions in scanned files.\n")
 				print(" /info /i	📋 Displays snapshot report information")
 				print(" /note /n	📝 Edits and saves the user note of the report")
@@ -2307,9 +2265,10 @@ def browse_json_tree(json_file):
 				print(" /search /find /f STRING\n 		🔎 Searches for files or folders by name")
 				print(" /sort /s [%s]\n" % ", ".join(valid_sort_keys), "		📊 Sorts the current directory by a specific key")
 				print(" /run /o NUMBER	🚀 Opens/runs file in system default program")
-				print(" /top /t (COUNT)🥇 Displays the top largest file sizes in scanned files. (default count = 10)\n")
-				print(" /topf /tf (COUNT)\n		🏆 Displays the top largest folders in scanned files. (default count = 10)\n")
-				print(" /tree /t	🌲 Displays the directory tree of the current directory")
+				print(" /top /t (COUNT)🥇 Displays the top largest file sizes in scanned files. (default count = 10)")
+				print(" /topf /tf (COUNT)\n		🏆 Displays the top largest folders in scanned files. (default count = 10)")
+				print(" /tree /t	🌲 Displays the directory tree of the current directory\n")
+				print(" /@@@@		💀 Debug: Raises an exception for testing purposes")
 				try:
 					pause(exit_message=f"{colored_stop} Exiting...")
 				except KeyboardInterrupt:
@@ -2323,7 +2282,7 @@ def browse_json_tree(json_file):
 			# Show scanning info
 			elif choice == "/info" or choice == "/i":
 				clear_screen()
-				title("📋 Report info - Tree Spider")
+				title_console("📋 Report info - Tree Spider")
 				print(print_cd(path))
 
 				print(report_info, "\n\n")
@@ -2333,7 +2292,7 @@ def browse_json_tree(json_file):
 
 			elif choice == "/error" or choice == "/e":
 				clear_screen()
-				title("🚨 Error logs - Tree Spider")
+				title_console("🚨 Error logs - Tree Spider")
 				print(print_cd(path))
 				print("\n	🚨 Error Report\n")
 				print(error_report, "\n")
@@ -2351,34 +2310,35 @@ def browse_json_tree(json_file):
 			# Display the most common file extensions
 
 			elif choice == "/ext" or choice == "/x":
-				error_message = (f"{colored_bulb} Usage: /ext {', '.join(valid_ext_keys)}")
+				error_message = (f"{colored_bulb} Usage: /ext [{', '.join(valid_ext_keys)}]")
 			elif choice.startswith("/ext ") or choice.startswith("/x "):
 				_, key = choice.split(" ", 1)
-				
+
 				if key in valid_ext_keys:
 					print("📎 Finding most common file extensions...")
 					spinner = Spinner()
 					spinner.start()
 					try:
-						result = get_most_common_file_extensions(node, key, None, total_size=data.get("total_size"), total_files=data.get("scanned_files"))
+						results = get_most_common_file_extensions(node, key, None, total_size=data.get("total_size"), total_files=data.get("scanned_files"))
 					except KeyboardInterrupt:
 						print(f"{colored_stop} Exiting...")
 						return
 					finally:
 						spinner.stop()
 					clear_screen()
-					title("📎 Most Common File Extensions - Tree Spider")
+					title_console("📎 Most Common File Extensions - Tree Spider")
+					logger.debug(f"📎 Result: {GREY}{results}{RESET}")
 					print(print_cd(path, emoji="📎"))
-					print("\n	📎 Most Common File Extensions\n")
+					print(f"\n	📎 Most Common File Extensions - Sorted by {valid_ext_keys_desc[valid_ext_keys.index(key)]}\n")
 					print("#	Ext.	Count	% Count	Size	% size")
 					print("-	----	-----	-------	----	------")
-					for i, item in enumerate(result, start=1):
+					for i, item in enumerate(results, start=1):
 						print(f"{i}.	{item[0]}	{item[1][0]}	{item[1][3] * 100:.2f} %	{humanize.naturalsize(item[1][1], binary=True)}	{item[1][2] * 100:.2f} %")
 					print("\n")
 					pause(exit_message=f"{colored_stop} Exiting...")
 				else:
-					error_message = (f"{colored_warn} Error: Invalid sorting key: {key}")	
-				
+					error_message = (f"{colored_warn} Error: Invalid sorting key: {key}")
+
 			# Open a file
 			elif choice == "/peek" or choice == "/p":
 				error_message = (f"{colored_bulb} Usage: /peek NUMBER (LINES)")
@@ -2398,7 +2358,7 @@ def browse_json_tree(json_file):
 					error_message = (f"{colored_warn} Error: Got too many arguments ({len(choice.split(' '))-1}). Please enter /preview NAME [LINES]")
 					continue
 				if n.isdigit() and 0 <= int(n) < len(node):
-					selected = node[int(n)]
+					selected = node[int(n) - 1]
 					if selected["type"] == "file":# and selected.get("mime", "").startswith("text")
 						if not "text" in selected.get("mime", ""):
 							print(f"{colored_warn} Selected file is not recognized as a text file. ({selected['mime']})")
@@ -2407,10 +2367,10 @@ def browse_json_tree(json_file):
 							if not choice == "y" or choice == "yes":
 								continue
 						clear_screen()
-						title(f"👀 Previewing {selected['name']} - Tree Spider")
+						title_console(f"👀 Previewing {selected['name']} - Tree Spider")
 						print(print_cd(path))
 						print(f"👀 Previewing: {selected['name']}\n")
-						
+
 						try:
 							preview_file(selected["path"], l)
 							pause()
@@ -2428,11 +2388,20 @@ def browse_json_tree(json_file):
 				error_message = (f"{colored_bulb} Usage: /sort [{', '.join(valid_sort_keys)}]")
 			elif choice.startswith("/sort ") or choice.startswith("/s "):
 				key = choice.split(" ")[1]
-				if key not in ["size", "name", "ctime", "mtime", "atime", "mime"]:
+				if key not in valid_sort_keys:
 					error_message = (f"{colored_warn} Error: Invalid sorting key: {key}")
 				else:
-					print(f"📊 Sorting list by {[valid_ext_keys_desc]}...")
-					node[:] = sort_entries(node, key)
+					print(f"📊 Sorting list by {valid_sort_keys_desc[valid_sort_keys.index(key)]}...")
+					spinner = Spinner()
+					spinner.start()
+					try:
+						node = sorted(node, key=lambda x: x[key], reverse=True)
+						error_message = f"📊 Sorted list by {valid_sort_keys_desc[valid_sort_keys.index(key)]}"
+					except KeyboardInterrupt:
+						print(f"{colored_stop} Exiting...")
+						return
+					finally:
+						spinner.stop()
 
 			# Search for a file or folder
 			elif choice == "/search" or choice == "/find" or choice == "/f":
@@ -2443,14 +2412,29 @@ def browse_json_tree(json_file):
 				spinner = Spinner()
 				spinner.start()
 				try:
-					results = search_files(structure, query)
+					results = search_files(node, query)
 				except KeyboardInterrupt:
 					print(f"{colored_stop} Exiting...")
 					return
 				spinner.stop()
-				
+
 				if len(results) > 0:
-					search_result(results, query, emoji="🔎")
+					set_nth_list(depth_dir_info, depth+1,
+					{
+						"name": "Searched for: " + query,
+						"path": "<search>",
+						"type": "folder",
+						"size": 0,
+						"attr": [],
+						"ctime": 0,
+						"mtime": 0,
+						"atime": 0,
+						"files": 0,
+						"folders": 0,
+						"access_denied": False
+					}
+					)
+					navigate(results, path + f"<Search: {query}>/", emoji="🔎", title=f"	🔎 Search Results for '{query}'\n")
 				else:
 					error_message = (f"{colored_exclamation} No results found for '{query}'")
 			# Search for a file or folder using a regular expression
@@ -2463,20 +2447,35 @@ def browse_json_tree(json_file):
 				spinner = Spinner()
 				spinner.start()
 				try:
-					results = search_files_regex(structure, regex)
+					results = search_files_regex(node, regex)
 				except KeyboardInterrupt:
 					print(f"{colored_stop} Exiting...")
 					return
 				spinner.stop()
-				
+
 				if len(results) > 0:
-					search_result(results, regex, emoji="🧩")
+					set_nth_list(depth_dir_info, depth+1,
+					{
+						"name": "Regex: " + regex,
+						"path": "<search>",
+						"type": "folder",
+						"size": 0,
+						"attr": [],
+						"ctime": 0,
+						"mtime": 0,
+						"atime": 0,
+						"files": 0,
+						"folders": 0,
+						"access_denied": False
+					}
+					)
+					navigate(results, path + f"<Regex: {regex}>", title=f"	🧩 Search Results for Regex: `{regex}`\n", emoji="🧩")
 				else:
 					error_message = (f"{colored_exclamation} No results found for '{regex}'")
 			# Show empty directories
 			elif choice == "/empty" or choice == "/ed":
-				title("🗑️ Empty directories - Tree Spider")
-				
+				title_console("🗑️ Empty directories - Tree Spider")
+
 				print("🗑️ Searching...")
 				spinner = Spinner()
 				spinner.start()
@@ -2489,13 +2488,28 @@ def browse_json_tree(json_file):
 					spinner.stop()
 
 				if len(files) > 0:
-					search_result(files, "Empty directories", emoji="🗑️")
+					set_nth_list(depth_dir_info, depth+1,
+					{
+						"name": "Empty directories",
+						"path": "<search>",
+						"type": "folder",
+						"size": 0,
+						"attr": [],
+						"ctime": 0,
+						"mtime": 0,
+						"atime": 0,
+						"files": 0,
+						"folders": 0,
+						"access_denied": False
+					}
+					)
+					navigate(files, path + "<Empty directories>/", title="	🗑️ Empty directories\n", emoji="🗑️")
 				else:
 					error_message = (f"{colored_check} No empty directories found.")
 			# Show duplicate files
 			elif choice == "/dup" or choice == "/u":
-				title("🪞 Duplicate files - Tree Spider")
-				
+				title_console("🪞 Duplicate Files - Tree Spider")
+
 				print("🪞 Searching...")
 				spinner = Spinner()
 				spinner.start()
@@ -2508,13 +2522,27 @@ def browse_json_tree(json_file):
 					spinner.stop()
 
 				if len(files) > 0:
-					search_result(files, "Duplicate files", emoji="🪞", sort_by="name")
+					set_nth_list(depth_dir_info, depth+1,
+					{
+						"name": "Duplicate Files",
+						"path": "<search>",
+						"type": "folder",
+						"size": 0,
+						"attr": [],
+						"ctime": 0,
+						"mtime": 0,
+						"atime": 0,
+						"files": 0,
+						"folders": 0,
+						"access_denied": False
+					}
+					)
+					navigate(files, path + "<Duplicate Files>/", title="	🪞 Duplicate Files\n", emoji="🪞", column="path")
 				else:
 					error_message = (f"{colored_check} No duplicate files found.")
 			# Show directory info
 			elif choice == "/dir" or choice == "/d":
 				clear_screen()
-				title("🪵 Directory info - Tree Spider")
 				print_dir_info(depth_dir_info[depth])
 				pause(exit_message=f"{colored_stop} Exiting...")
 			# Show recent files
@@ -2527,7 +2555,7 @@ def browse_json_tree(json_file):
 					error_message = (f"{colored_warn} Error: Invalid number: {n}")
 				else:
 					n = int(n)
-					title("🕰️ Recent files - Tree Spider")
+					title_console("🕰️ Recent files - Tree Spider")
 					print("🕰️ Searching...")
 					spinner = Spinner(char="fragment")
 					spinner.start()
@@ -2539,7 +2567,22 @@ def browse_json_tree(json_file):
 					finally:
 						spinner.stop()
 					if len(files) > 0:
-						search_result(files, f"Recent files ({n})", sort_by="mtime", emoji="🕒")
+						set_nth_list(depth_dir_info, depth+1,
+						{
+						"name": "Top " + str(n) + " recent files",
+						"path": "<search>",
+						"type": "folder",
+						"size": 0,
+						"attr": [],
+						"ctime": 0,
+						"mtime": 0,
+						"atime": 0,
+						"files": 0,
+						"folders": 0,
+						"access_denied": False
+					}
+					)
+						navigate(files, path + f"<Top {n} recent files>/", title=f"	🕒 Recent files ({n})\n", column="mtime", emoji="🕒")
 					else:
 						error_message = (f"{colored_exclamation} No results found for '{n}'")
 
@@ -2564,7 +2607,22 @@ def browse_json_tree(json_file):
 					finally:
 						spinner.stop()
 					if len(files) > 0:
-						search_result(files, f"Top {n} Largest Folders", sort_by="size", emoji="🏆")
+						set_nth_list(depth_dir_info, depth+1,
+						{
+						"name": "Top " + str(n) + " Largest Folders",
+						"path": "<search>",
+						"type": "folder",
+						"size": 0,
+						"attr": [],
+						"ctime": 0,
+						"mtime": 0,
+						"atime": 0,
+						"files": 0,
+						"folders": 0,
+						"access_denied": False
+					}
+					)
+						navigate(files, f"/<Top {n} Largest Folders>", title=f"Top {n} Largest Folders", column="size", emoji="🏆")
 					else:
 						error_message = (f"{colored_exclamation} No results found for '{n}'")
 			# Show top n largest files in json
@@ -2588,7 +2646,23 @@ def browse_json_tree(json_file):
 					finally:
 						spinner.stop()
 					if len(files) > 0:
-						search_result(files, f"Top {n} Largest Files", sort_by="size", emoji="🥇")
+						selected = files[0]
+						set_nth_list(depth_dir_info, depth+1,
+						{
+						"name": "Top " + str(n) + " Largest Files",
+						"path": "<search>",
+						"type": "folder",
+						"size": 0,
+						"attr": [],
+						"ctime": 0,
+						"mtime": 0,
+						"atime": 0,
+						"files": 0,
+						"folders": 0,
+						"access_denied": False
+					}
+					)
+						navigate(files,path + f"/<Top {n} Largest Files>", f"Top {n} Largest Files", column="size", emoji="🥇")
 					else:
 						error_message = (f"{colored_exclamation} No results found for '{n}'")
 			elif choice == "/run" or choice == "/o":
@@ -2609,11 +2683,14 @@ def browse_json_tree(json_file):
 			elif choice.startswith("/run ") or choice.startswith("/o "):
 				_, choice = choice.split(" ", 1)
 				open_file(choice, node)
+			elif choice == ("/@@@@"):
+				# raise ZeroDivisionError
+				error_message = (1/0)
 			# Number navigation
-			elif choice.isdigit() and 0 <= int(choice) < len(node):
-				selected = node[int(choice)]
+			elif choice.isdigit() and 0 <= int(choice) < len(node) + 1:
+				selected = node[int(choice) - 1]
 				if selected["type"] == "folder":
-					set_nth_list(depth_dir_info, depth+1, 
+					set_nth_list(depth_dir_info, depth+1,
 					{
 						"name": selected.get("name"),
 						"path": selected.get("path"),
@@ -2628,10 +2705,9 @@ def browse_json_tree(json_file):
 						"access_denied": selected.get("access_denied")
 					}
 					)
-					navigate(selected["children"], path + selected["name"] + "/")
+					navigate(selected["children"], path + selected["name"] + "/", emoji="🌳")
 				elif selected["type"] in ["file", "junction", "symlink"]:
 					clear_screen()
-					title(f"🍎 {selected['name']} - Tree Spider")
 					if selected["type"] in ["junction", "symlink"]:
 						print_link_info(selected)
 					else:
@@ -2640,7 +2716,7 @@ def browse_json_tree(json_file):
 			elif choice.isnumeric() or choice.isdigit() and (int(choice) < 0 or int(choice) >= len(node)):
 				error_message = f"{colored_warn} Invalid choice: {choice}"
 
-	navigate(structure)
+	navigate(structure, emoji="🌳")
 
 
 
@@ -2662,7 +2738,7 @@ def naturalsize_to_int(value):
 	Example:
 		>>> naturalsize_to_int("10M")
 		10000000
-		>>> naturalsize_to_int("5Gi")
+		>>> naturalsize_to_int("5Gi")0
 		5368709120
 		>>> naturalsize_to_int("123")
 		123
@@ -2738,7 +2814,7 @@ def todo(message):
 	return(f"\033[32m📌 [Reminder]\033[0m - {message}\n")
 
 def main(args):
-	global magic_max_size, directory, json_file, scan_log_dir
+	global magic_max_size, directory, json_file, scan_log_dir, last_opened_json, last_scan_dir
 	magic_max_size = naturalsize_to_int(args.threshold)
 	directory = None
 	json_file = None
@@ -2750,12 +2826,14 @@ def main(args):
 		try:
 			config.read(config_file)
 			last_opened_json = config.get("tree_util", "last_opened_json")
-		except UnicodeDecodeError:
-			os.remove(config_file)
+			last_scan_dir = config.get("tree_util", "last_scan_dir")
+		except Exception:
 			last_opened_json = ""
+			last_scan_dir = ""
 
 	else:
 		last_opened_json = ""
+		last_scan_dir = ""
 
 	no_attributes = args.no_attributes
 
@@ -2774,15 +2852,17 @@ def main(args):
 		global action, threaded, directory, gui_enabled, main_menu_enabled, magic_max_size, json_file, error_message, open_after_scan, force_magic, use_magika
 		main_menu_enabled = True
 		while True:
+			title_console("🌳 Tree Spider: Threaded Edition")
 			clear_screen()
 			json_file = ''
 			directory = ''
 			print("\n📍 Enter commands to begin:\n")
 			print(" 🖥️ Main commands\n")
 			print(f"  📂 Scan a directory:	'{GREY}scan{RESET}', '{GREY}s{RESET}'")
-			print(f"  📜 Explore JSON:	'{GREY}browse{RESET}', '{GREY}b{RESET}'")
+			print(f"  ⌚ Scan Again:	'{GREY}again{RESET}', '{GREY}a{RESET}'{'	['+ last_scan_dir+']' if last_opened_json else ''}\n")
+			print(f"  📑 Explore JSON:	'{GREY}browse{RESET}', '{GREY}b{RESET}'")
 			if last_opened_json:
-				print(f"  🗓️ Last opened JSON:	'{GREY}last{RESET}', '{GREY}l{RESET}'")
+				print(f"  🗓️ Last opened JSON:	'{GREY}last{RESET}', '{GREY}l{RESET}'{'	['+ last_opened_json+']' if last_opened_json else ''}")
 			print("\n 🔧 Scan Settings\n")
 			print(f"  📏 Magic max size [{humanize.naturalsize(magic_max_size, binary=True)}]:	'{GREY}magic{RESET}', '{GREY}m{RESET}'")
 			if "magika" in sys.modules:
@@ -2808,20 +2888,25 @@ def main(args):
 				browse_mode()
 			elif action == 'scan' or action == 's':
 				scan_mode()
+			elif action == 'again' or action == 'a':
+				scan_again()
 			elif action == 'last' or action == 'l':
 				open_last_opened()
 			elif action == "magic" or action == "m":
-			
-				print("Set mime threshold:")
+				title_console("📏 Set Threshold: Threaded Edition")
+				print("📏 Set mime threshold:")
 				print(f"Current: {humanize.naturalsize(magic_max_size, binary=True)} ({humanize.intcomma(magic_max_size)} byte{plural(magic_max_size)})")
 
 				while True:
 					try:
-						magic_max_size = naturalsize_to_int(input_or_exit(">>> "))
-						error_message = (f"📏 New threshold: {humanize.naturalsize(magic_max_size, binary=True)} ({humanize.intcomma(magic_max_size)} byte{plural(magic_max_size)})")
+						magic_max_size = naturalsize_to_int(input(">>> "))
 						break
 					except ValueError:
 						error_message = (f"{colored_warn} Invalid input. Please enter a number.")
+					except KeyboardInterrupt:
+						magic_max_size = 1 * 1024 * 1024
+						break
+				error_message = (f"📏 New threshold: {humanize.naturalsize(magic_max_size, binary=True)} ({humanize.intcomma(magic_max_size)} byte{plural(magic_max_size)})")
 
 			elif action == "magika" or action == "k":
 				if "magika" in sys.modules:
@@ -2853,6 +2938,8 @@ def main(args):
 					logger.setLevel(logging.DEBUG)
 					error_message = (f"🎚️ Verbosity set to DEBUG")
 			elif action == "r" or action == "reload":
+				print(f"🔄️ Reloading...")
+				error_message = (f"✨ Reloaded!")
 				exec(open(__file__).read())
 			elif action == "exit" or action == "quit" or action == "q" or action == "..":
 				print(f"{colored_stop} Exiting...")
@@ -2861,19 +2948,20 @@ def main(args):
 				if main_menu_enabled == True:
 					main_menu()
 				else:
-					logging.error(error_message)
+					logger.error(error_message)
 					exit(1)
-				
+
 			else:
 				error_message = (f"{colored_warn} Invalid action. Please enter 'scan' or 'browse'.")
 				if main_menu_enabled == True:
 					main_menu()
 				else:
-					logging.error(error_message)
+					logger.error(error_message)
 					exit(1)
-	
+
 	def scan_mode():
 		global directory, error_message
+		title_console("📂 Select Folder - Tree Spider")
 		if not directory or directory == '':
 			if gui_enabled:
 				root = Tk()
@@ -2885,13 +2973,16 @@ def main(args):
 				print(f" '{directory}'")
 			else:
 				print("📂 Enter the scan directory path: ")
-				directory = input_or_exit(">>> ")
+				try:
+					directory = input(">>> ")
+				except:
+					return
 			if not directory:
 				error_message = (f"{colored_warn} No directory path provided.")
 				if main_menu_enabled:
 					main_menu()
 				else:
-					logging.error(error_message)
+					logger.error(error_message)
 					exit(1)
 			elif not os.path.isdir(directory):
 				error_message = (f"{colored_warn} Invalid directory path: '{directory}'")
@@ -2899,7 +2990,7 @@ def main(args):
 				if main_menu_enabled:
 					main_menu()
 				else:
-					logging.error(error_message)
+					logger.error(error_message)
 					exit(1)
 
 		if args.output:
@@ -2908,6 +2999,7 @@ def main(args):
 			default_output_file = f"{get_deepest_folder(directory)[:50]}_{seconds_to_datetime(time.time(), True)}.structure.json.bz2"
 
 			if not args.simulate:
+				title_console("💾 Output File - Tree Spider")
 				if gui_enabled: # Set save location
 					root = Tk()
 					root.withdraw()
@@ -2923,11 +3015,14 @@ def main(args):
 							exit(1)
 					print(f" '{output_file}'")
 				else:
-					print("💾 Enter the output file path: ")
-					output_file = input_or_exit(">>> ").strip()
+					print(f"💾 Enter the output file path (leave blank for default name / CTRL+C to cancel): ")
+					try:
+						output_file = input(">>> ").strip()
+					except KeyboardInterrupt:
+						return
 					if not output_file:
 						output_file = scan_log_dir +"/"+ default_output_file
-						logging.warning(f"{colored_warn} No output file path provided. Defaulting to '{output_file}'")
+						logger.warning(f"{colored_warn} No output file path provided. Defaulting to '{output_file}'")
 					elif output_file.endswith(".json"):
 						output_file += ".bz2"
 					elif not output_file.endswith(".json.bz2"):
@@ -2953,11 +3048,11 @@ def main(args):
 
 		time_taken = save_json_tree(directory, output_file=output_file, simulate=args.simulate, no_attributes=no_attributes, magic_max_size=magic_max_size, use_threads=threaded, force_magic=force_magic, no_estimates=args.no_estimates, use_magika=use_magika)
 		sys.stdout.write("\n")
-		title(f"✅ Task Complete - Tree Spider")
+		title_console(f"✅ Task Complete - Tree Spider")
 		if args.simulate:
-			logging.info(f"{colored_check} Simulation complete!")
+			logger.info(f"{colored_check} Simulation complete!")
 		else:
-			logging.info(f"{colored_check} Folder structure saved to '{output_file}'")
+			logger.info(f"{colored_check} Folder structure saved to '{output_file}'")
 			print(f'{colored_bulb} You can open output file with `{GREY}python3 "{os.path.abspath(__file__)}" -b "{os.path.abspath(output_file)}"{RESET}`')
 		if gui_enabled:
 			root = Tk()
@@ -2975,30 +3070,31 @@ def main(args):
 			browse_json_tree(output_file)
 	def browse_mode():
 		global json_file, error_message
+		title_console(f"📑 Select Report - Tree Spider")
 		if not json_file:
 			if gui_enabled:
 				root = Tk()
 				root.withdraw()
 				root.attributes("-topmost", True)
-				print("📂 Select the BZip2 JSON file to browse:")
+				print("📑 Select the BZip2 JSON file to browse:")
 				json_file = filedialog.askopenfilename(title="Select BZip2 JSON File", filetypes=[("JSON File", "*.json.bz2")],initialdir=scan_log_dir, defaultextension=".json.bz2")
 				root.destroy()
-				
+
 				if not json_file or json_file =='':
 					error_message = (f"{colored_warn} No JSON file path provided.")
 					if main_menu_enabled:
 						main_menu()
 					else:
-						logging.error(error_message)
+						logger.error(error_message)
 						exit(1)
-				
+
 			else:
-				
+
 				def print_files(directory):
 					print (f"\n📂 Scan log directory: {directory}\n")
 
 					# Get all files with their creation timestamps and sizes
-					files = [(f, os.path.getctime(os.path.join(directory, f)), os.path.getsize(os.path.join(directory, f))) 
+					files = [(f, os.path.getctime(os.path.join(directory, f)), os.path.getsize(os.path.join(directory, f)))
 						for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
 
 					# Sort by creation time (oldest to newest)
@@ -3011,20 +3107,23 @@ def main(args):
 								print(f" {file}	({humanize.naturalsize(size,binary=True)})	[{humanize.naturaltime(time.time() - ctime)}]")
 							else:
 								print(f" {directory}/{file}	({humanize.naturalsize(size,binary=True)})	[{humanize.naturaltime(time.time() - ctime)}]")
-					
+
 				print_files(".")
 				print_files(scan_log_dir)
-				
-				print("\n📂 Enter the JSON file path: ")
-				json_file = input_or_exit(">>> ").strip()
+
+				print("\n📑 Enter the JSON file path: ")
+				try:
+					json_file = input(">>> ").strip()
+				except KeyboardInterrupt:
+					return
 				if not json_file or json_file =='':
 					error_message = (f"{colored_warn} No JSON file path provided.")
 					if main_menu_enabled:
 						main_menu()
 					else:
-						logging.error(error_message)
+						logger.error(error_message)
 						exit(1)
-				
+
 				if os.path.isfile(json_file+'.bz2'):
 					json_file = json_file+'.bz2'
 				elif os.path.isfile(json_file+'.json.bz2'):
@@ -3037,13 +3136,13 @@ def main(args):
 						root.attributes("-topmost", True)
 						messagebox.showerror("Error", f"Invalid JSON file path: '{json_file}'")
 						root.destroy()
-					
+
 					if main_menu_enabled:
 						main_menu()
 					else:
-						logging.error(error_message)
+						logger.error(error_message)
 						exit(1)
-		print("\n📜 Loading JSON file: ", json_file)
+		print("\n📑 Loading JSON file: ", json_file)
 		browse_json_tree(json_file)
 		if main_menu_enabled:
 			main_menu()
@@ -3055,19 +3154,19 @@ def main(args):
 			try:
 				config.read(config_file)
 				last_opened_json = config.get("tree_util", "last_opened_json")
-			except UnicodeDecodeError:
-				os.remove(config_file)
+			except Exception:
+
 				last_opened_json = ""
 
 		else:
 			last_opened_json = ""
-		
+
 		if not last_opened_json:
 			error_message = (f"{colored_warn} Last opened JSON file not found: {last_opened_json}")
 			if main_menu_enabled:
 				main_menu()
 			else:
-				logging.error(error_message)
+				logger.error(error_message)
 				exit(1)
 		elif os.path.exists(last_opened_json):
 			json_file = last_opened_json
@@ -3078,8 +3177,39 @@ def main(args):
 			if main_menu_enabled:
 				main_menu()
 			else:
-				logging.error(error_message)
+				logger.error(error_message)
 				exit(1)
+	def scan_again():
+		global error_message,directory
+		if os.path.exists(config_file):
+			try:
+				config.read(config_file)
+				last_scan_dir = config.get("tree_util", "last_scan_dir")
+			except Exception:
+
+				last_scan_dir = ""
+
+		else:
+			last_scan_dir = ""
+
+		if not last_scan_dir:
+			error_message = (f"{colored_warn} Last opened directory not found: {last_scan_dir}")
+			if main_menu_enabled:
+				main_menu()
+			else:
+				logger.error(error_message)
+				exit(1)
+		elif os.path.exists(last_scan_dir):
+			directory = last_scan_dir
+			print(f"\n📂 Scanning directory: {directory}")
+			scan_mode()
+		else:
+			error_message = (f"{colored_warn} Last opened directory not found: {last_scan_dir}")
+			if main_menu_enabled:
+				main_menu()
+			else:
+				logger.error(error_message)
+
 	main_menu_enabled = False
 	if args.scan:
 		action = "scan"
@@ -3094,7 +3224,7 @@ def main(args):
 		open_last_opened()
 	else:
 		main_menu()
-	
+
 
 
 # print(todo("Todo: Compress json file to reduce size. (e.g. gzip, brotli, zstd)"))
@@ -3114,9 +3244,9 @@ if __name__ == "__main__":
 		from tkinter import filedialog, messagebox, Tk
 	except Exception as i:
 		print(f"{colored_warn} {YELLOW}[{type(i).__name__}]{RESET}: {i} - GUI not available.")
-		
-	title("🌳 Tree Spider")
-	
+
+	title_console("🌳 Tree Spider")
+
 	config = configparser.ConfigParser()
 	config_file = os.path.join(os.path.dirname(__name__), 'tree_util_config.ini')
 
@@ -3126,7 +3256,7 @@ if __name__ == "__main__":
 	mode.add_argument("-b", "--browse", type=str, help="Explore a structured JSON file. Specify the JSON file path.")
 	mode.add_argument("-s", "--scan", type=str, help="Scan and create a structured JSON file. Specify the scan directory path.")
 	parser.add_argument("-o", "--output", type=str, help="Specify the path for the BZip2 compressed output. If not specified, the output is saved in the current directory with a datetime. can be used with '-s'.")
-	parser.add_argument("-t", "--threshold", type=str, default=naturalsize_to_int("10Mi"), help="Specify the threshold in bytes for enabling deep file type scanning (e.g. 50K, 10Mi, 100 etc.). If the file size is greater than the value, the MIME type is first detected by the mimetypes module (which detects by extension), then if the MIME type is unknown or too common (e.g. text/plain), the magic module is used for deep MIME type detection. Set value to 0 to disable deep file type scanning which makes the script faster. can be used with '-s'.")
+	parser.add_argument("-t", "--threshold", type=str, default=naturalsize_to_int("1Mi"), help="Specify the threshold in bytes for enabling deep file type scanning (e.g. 50K, 10Mi, 100 etc.). If the file size is greater than the value, the MIME type is first detected by the mimetypes module (which detects by extension), then if the MIME type is unknown or too common (e.g. text/plain), the magic module is used for deep MIME type detection. Set value to 0 to disable deep file type scanning which makes the script faster. can be used with '-s'.")
 	parser.add_argument("-g", "--gui", action="store_true", help="Open the GUI file selection to choose a directory (it's easier this way).")
 	parser.add_argument("-m", "--simulate", action="store_true", help="Simulate the scan process, rather than actually writing the JSON file. This is useful for testing purposes.")
 	parser.add_argument("-e", "--explore", action="store_true", help="Explore a structured JSON file soon after it's created.")
