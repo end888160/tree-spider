@@ -71,7 +71,7 @@ import sys
 import bz2
 import re
 import os
-try: # Google Magika, Python <= 3.12
+try: # Google Magika, Python 3.12 - 3.8	
 	from magika import Magika
 	import pathlib
 	m = Magika()
@@ -120,9 +120,7 @@ except ModuleNotFoundError as m: # Keyboard, optional
 
 try:
 	import magic
-	flag_noMagic = False
 except ModuleNotFoundError as m:
-	flag_noMagic = True
 	print(f"{colored_warn}{YELLOW}[{type(m).__name__}]{RESET}: {m} - MIME types will be detected using file extensions.")
 	print("But you can install python-magic-bin to speed up the process.")
 	if os.name == "nt":  # Windows
@@ -134,7 +132,7 @@ except Exception as i:
 	print(f"{colored_warn} {YELLOW}[{type(i).__name__}]{RESET}: {i}; Check your Magic installation.\n")
 	error_logs.append({"name": "magic", "type": str(type(i).__name__), "desc": str(i)})
 
-if not flag_noMagic:
+if "magic" in sys.modules:
 	try:# Test if magic is working
 		magic.from_buffer(b"", mime=True)
 	except Exception as m:
@@ -233,29 +231,22 @@ class Spinner:
 init_spinner = Spinner()
 init_spinner.start()
 
-def timed_choice(prompt, timeout=10, default=True):
-	"""Asks for (y/n) input with a timeout, returning the default choice if time expires."""
-	user_input = [None]  # Use a list to store mutable input
-	
-	def get_input():
-		"""Waits for user input."""
-		try:
-			user_input[0] = input(f"\n{prompt} (y/n) [Default: {default}] in {timeout}s: ").strip().lower()
-		except KeyboardInterrupt:
-			print("\nOperation canceled by user.")
+from inputimeout import inputimeout, TimeoutOccurred
 
+def timed_choice(question, timeout=10, default=False):
+	# Function to ask a yes/no question with a timeout
+	# If y == return True else return False
 	try:
-		# Start input in a separate thread
-		input_thread = threading.Thread(target=get_input, daemon=True)
-		input_thread.start()
-		
-		# Wait for timeout or input completion
-		input_thread.join(timeout)
-	except KeyboardInterrupt:
-		print("\nOperation canceled by user.")
-	
-	# Return user input or default if timeout
-	return (True if user_input[0] == "y" else False) if user_input[0] in ("y", "n") else default
+		answer = inputimeout(prompt=f"{question} (yes/no) [Default: {default}]\n", timeout=timeout)
+		if answer.lower() == 'y' or answer.lower() == 'yes':
+			return True
+		else:
+			return False
+	except TimeoutOccurred:
+		print('\nTimed out! Using default response.')
+		return default
+
+# Example usage
 
 def seconds_to_datetime(seconds, ispath=False):
 	"""Convert a Unix timestamp in seconds to a human-readable string.
@@ -1039,10 +1030,11 @@ def get_mime_type(file_path, max_size, force_magic, use_magika):  # Limit MIME d
 		str: Mime type of the file
 	"""
 	global magic_scanned
-		# First, get mime type by extension
 	try:
+		# First, get mime type by extension
 		mime = mimetypes.guess_type(file_path)[0]
-		if max_size > os.path.getsize(file_path) and not flag_noMagic: # if file size is greater than 10MB, never use magic
+		# if file size is greater than threshold, never use magic to prevent disk overload
+		if max_size > os.path.getsize(file_path): 
 			# If mime type is unknown or common, use magic for deep search
 			if (mime == None or mime == '' or mime == "application/octet-stream" or mime == "text/plain") or force_magic: # If mime type is too common, or forced to use magic
 				try:
@@ -1050,7 +1042,7 @@ def get_mime_type(file_path, max_size, force_magic, use_magika):  # Limit MIME d
 						mime = m.identify_path(pathlib.Path(file_path)).output.mime_type
 						if use_magika:
 							magic_scanned += 1
-					else: # If not using magika
+					elif use_magika and "magic" in sys.modules: # If not using magika
 						mime = magic.from_file(file_path, mime=True)
 						if not use_magika:
 							magic_scanned += 1
@@ -1663,19 +1655,19 @@ def search_files_regex(node, query, results=None):
 	return results
 
 def search_duplicates(node, file_map=None):
-    """Search for duplicate files in a directory tree based on name and size."""
-    if file_map is None:
-        file_map = defaultdict(list)  # Dictionary to store files by (name, size)
-    
-    for item in node:
-        if item["type"] == "file":
-            key = (item["name"], item["size"])
-            file_map[key].append(item)
-        elif item["type"] == "folder":  # Recursive call for subdirectories
-            search_duplicates(item["children"], file_map)
-    
-    # Return only duplicate files (i.e., keys with more than one entry)
-    return {k: v for k, v in file_map.items() if len(v) > 1}
+	"""Search for duplicate files in a directory tree based on name and size."""
+	if file_map is None:
+		file_map = defaultdict(list)  # Dictionary to store files by (name, size)
+	
+	for item in node:
+		if item["type"] == "file":
+			key = (item["name"], item["size"])
+			file_map[key].append(item)
+		elif item["type"] == "folder":  # Recursive call for subdirectories
+			search_duplicates(item["children"], file_map)
+	
+	# Return only duplicate files (i.e., keys with more than one entry)
+	return {k: v for k, v in file_map.items() if len(v) > 1}
 
 
 def get_most_common_file_extensions(node, mode="freq", extensions=None, total_size=None, total_files=None):
@@ -3120,9 +3112,7 @@ if __name__ == "__main__":
 	import configparser
 	try:
 		from tkinter import filedialog, messagebox, Tk
-		flag_noTk = False
 	except Exception as i:
-		flag_noTk = True
 		print(f"{colored_warn} {YELLOW}[{type(i).__name__}]{RESET}: {i} - GUI not available.")
 		
 	title("🌳 Tree Spider")
@@ -3157,7 +3147,7 @@ if __name__ == "__main__":
 		logger.setLevel(logging.DEBUG)
 	else:
 		logger.setLevel(logging.INFO)
-	if args.gui and not flag_noTk:
+	if args.gui and not "tkinter" in sys.modules:
 		gui_enabled = True
 	else:
 		gui_enabled = False
