@@ -1,0 +1,6 @@
+tqdm
+python-magic-bin
+humanize
+psutil
+keyboard
+inputimeout
